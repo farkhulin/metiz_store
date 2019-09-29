@@ -5,7 +5,7 @@
 (function ($) {
   Drupal.behaviors.metiz_storeBehavior = {
     attach: function (context, settings) {
-      console.log('metiz_store.js - enabled');
+      // console.log('metiz_store.js - enabled');
 
       if ($('body').hasClass('page-admin-store')) {
         $('.order-details').on('click', function() {
@@ -128,7 +128,7 @@
                 data: dataMass,
                 dataType: 'html',
                 success: function (r) {
-                  console.log('debug: ' + r);
+                  // console.log('debug: ' + r);
                   if (r == 'success') {
                     add_cart_message();
                     cart_update();
@@ -224,14 +224,14 @@
       }, 100);
 
       function cart_update() {
-        console.log('cart_update');
+        // console.log('cart_update');
         $.ajax({
           type: 'get',
           url: '/metiz_store_cart_block_ajax',
           data: {},
           dataType: 'html',
           success: function (r) {
-            console.log(r);
+            // console.log(r);
             var data  = r;
             $('#cart_box .quantity').html(r);
             if (r == 'Корзина пуста') {
