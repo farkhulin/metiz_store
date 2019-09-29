@@ -1,0 +1,299 @@
+<?php
+/**
+ * Metiz Store module developed by Marat Farkhulin (marat.farkhulin@gmail.com).
+ * 
+ * * TODO: transfer AJAX functions in ajax.inc.
+ * * TODO: transfer utility functions in helper.inc.
+ * * TODO: transfer order managment functions in managment.inc.
+ * * TODO: transfer cart functions in cart.inc.
+ * * TODO: transfer blocks in blocks.inc.
+ * * TODO: transfer forms in forms.inc.
+ * * TODO: create module setting page and create testing mode (no send emails).
+ * * TODO: add to module setting page variable number shown orders on managment orders page.
+ * ? TODO: checks for phone numbers and email in order form.
+ * ! TODO: clean code PHP and JS.
+ */
+
+metiz_store_include('ajax');
+metiz_store_include('helper');
+metiz_store_include('managment');
+metiz_store_include('cart');
+metiz_store_include('blocks');
+metiz_store_include('forms');
+
+function metiz_store_menu() {
+  $items = array();
+  $items['admin/store/settings'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Settings'),
+    'description' => t('Metiz Store settings page'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('metiz_store_admin'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['metiz_store_order_update'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Metiz Store Update'),
+    'description' => t('Metiz Store Update'),
+    'page callback' => 'metiz_store_order_update',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['admin/store'] = array(
+    'title' => t('Магазин'),
+    'description' => t('Магазин'),
+    'page callback' => 'metiz_store',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['shop/cart'] = array(
+    'title' => t('Корзина'),
+    'description' => t('Metiz Store CART'),
+    'page callback' => 'metiz_store_order_cart',
+    'access callback' => TRUE,
+  );
+  $items['shop/cart/success'] = array(
+    'title' => t('Спасибо за Ваш заказ!'),
+    'description' => t('Metiz Store CART Success'),
+    'page callback' => 'metiz_store_order_cart_success',
+    'access callback' => TRUE,
+  );
+  $items['metiz_store_cart_block_ajax'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Metiz Store Update'),
+    'description' => t('Metiz Store Update'),
+    'page callback' => 'metiz_store_cart_block_ajax',
+    'access callback' => TRUE,
+  );
+  $items['metiz_store_cart_delete_ajax'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Metiz Store Delete from Cart'),
+    'description' => t('Metiz Store Delete from Cart'),
+    'page callback' => 'metiz_store_cart_delete_ajax',
+    'access callback' => TRUE,
+  );
+  $items['metiz_store_add_to_cart_ajax'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Metiz Store Add To Cart'),
+    'description' => t('Metiz Store Add To Cart'),
+    'page callback' => 'metiz_store_add_to_cart_ajax',
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+function metiz_store_admin() {
+  $form = array();
+  $testing_mode = variable_get('metiz_store_testing_mode');
+  $testingModeHTML = t('<p>Магазин работает в нормальном режиме.</p>');
+  if (trim($testing_mode['on']) == 'on') {
+    $testingModeHTML = t('<p style="color: red;">Магазин работает в тестовом режиме!</p>');
+  }
+  $form['metiz_store_header'] = array(
+    '#markup' => t('<h2>Настройки магазина: </h2>'.$testingModeHTML),
+  );
+  $form['metiz_store_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email магазина'),
+    '#default_value' => variable_get('metiz_store_email'),
+    '#description' => t('На этот адрес будут отправляться письма после оформления заказов.'),
+    '#required' => TRUE,
+  );
+  $form['metiz_store_orders_number'] = array(
+    '#title' => t('Количество заказов на странице'),
+    '#type' => 'select',
+    '#description' => 'Выберите количество заказов показываемых на одной странице. ВСЕ - показывать все заказы на одной странице.',
+    '#default_value' => variable_get('metiz_store_orders_number'),
+    '#options' => array(
+      'all' => t('-ВСЕ-'), 
+      '10' => t('10'), 
+      '25' => t('25'), 
+      '50' => t('50'), 
+      '100' => t('100'),
+    ),
+  );
+  $form['metiz_store_testing_mode'] = array(
+    '#title' => t('Тестовый режим'),
+    '#type' => 'checkboxes',
+    '#description' => t('Если тестовый режим включен, то письма администратору и клиентам после оформления заказа отправляться не будут!'),
+    '#default_value' => variable_get('metiz_store_testing_mode', 0),
+    '#options' => array(
+      'on' => t('включить'),
+    ),
+  );
+
+  return system_settings_form($form);
+}
+
+function metiz_store() {
+  return drupal_render(drupal_get_form('metiz_store_form'));
+}
+
+function metiz_store_add_order() {
+  global $user;
+
+  $orderUserUID = $user->uid;
+  $orderUser = $_POST['name'];
+  $orderPhone = $_POST['phone'];
+  $orderEmail = $_POST['email'];
+  $orderAddress = $_POST['address'];
+  $_SESSION['customer_name'] = $_POST['name'];
+  $_SESSION['customer_email'] = $_POST['email'];
+  $_SESSION['customer_phone'] = $_POST['phone'];
+  $_SESSION['customer_address'] = $_POST['address'];
+
+  $orderID = date('YmdHis', time());
+
+  $to = variable_get('metiz_store_email');
+
+  db_query("INSERT INTO orders (oid, uid, name, mail, phone, address, status) VALUES ('".$orderID."', '".$orderUserUID."', '".$orderUser."', '".$orderEmail."', '".$orderPhone."', '".$orderAddress."', '0')");
+
+  $subject = 'Заказ №'.$orderID.' от '.$orderUser;
+  $message = '<p>Заказчик: '.$orderUser.'</p>
+  <p>Номер телефона: '.$orderPhone.'</p>
+  <p>E-mail: '.$orderEmail.'</p>
+  <p>Адрес: '.$orderAddress.'</p>
+  <table style="margin-bottom: 30px; border: 1px #eee solid; background: #eee; width: 100%;">
+  <tr style="background: #eee;">
+  <th style="padding: 6px 10px;">Название</th><th style="padding: 6px 10px;">Описание</th><th style="padding: 6px 10px;">Цена</th>
+  </tr>';
+  foreach ($_SESSION['cart'] as $key => $value) {
+    if ($value['nid'] == '') {
+      $n = node_load($value);
+    } else {
+      $n = node_load($value['nid']);
+    }
+    $message .= '<tr><td style="padding: 6px 10px; background: #fff;">'.$n->title.'</td>';
+    $orderDescription = '';
+    $orderDescriptionHTML = '';
+
+    if ($value['nid'] != '') {
+      if (isset($_SESSION['cart'][$key]['add_in_cart_nocalc'])) {
+        $message .= '<td style="padding: 6px 10px; background: #fff;">';
+        foreach ($_SESSION['cart'][$key] as $field => $data){
+          if ($field != 'nid' && $field != 'add_in_cart_nocalc' && $field != 'hidden_sum' && $field != 'table') {
+            $parse = explode('|', $data);
+            $message .=  '<span>'.$parse[0].': '.$parse[1].'</span><br>';
+
+            $orderDescription .= $parse[0].': '.$parse[1].'\r\n';
+          }
+        }
+        $message .= '</td>';
+      } else {
+        if ($value['diametr'] != '' && $value['length'] != '') {
+          $orderDescription .= 'Габариты: '.$value['diametr'].' x '.$value['length'].'\r\n';
+          $orderDescriptionHTML .= '<span>Габариты: '.$value['diametr'].' x '.$value['length'].'</span><br>';
+        }
+        if ($value['coating'] != '') {
+          $orderDescription .= 'Покрытие: '.$value['coating'].'\r\n';
+          $orderDescriptionHTML .= '<span>Покрытие: '.$value['coating'].'</span><br>';
+        }
+        if ($value['strength'] != '') {
+          $orderDescription .= 'Класс прочности: '.$value['strength'].'\r\n';
+          $orderDescriptionHTML .= '<span>Класс прочности: '.$value['strength'].'</span><br>';
+        }
+        if ($value['number'] != '') {
+          $orderDescription .= 'Количество: '.$value['number'].' шт.\r\n';
+          $orderDescriptionHTML .= '<span>Количество: '.$value['number'].' шт.</span><br>';
+        }
+        if ($value['weight'] != '') {
+          $orderDescription .= 'Вес: '.$value['weight'].' кг.\r\n';
+          $orderDescriptionHTML .= '<span>Вес: '.$value['weight'].' кг.</span><br>';
+        }
+
+        $message .= '<td style="padding: 6px 10px; background: #fff;">'.$orderDescriptionHTML.'</td>';
+      }
+    } else {
+      $message .= '<td style="padding: 6px 10px; background: #fff;"></td>';
+    }
+
+    if ($value['nid'] == '') {
+      $cost = $n->field_cost['und'][0]['value'];
+    } else {
+      $cost = $value['sum'];
+    }
+    if (isset($_SESSION['cart'][$key]['add_in_cart_nocalc'])) {
+      $cost = $_SESSION['cart'][$key]['hidden_sum'];
+    }
+    $message .= '<td style="padding: 6px 10px; background: #fff;">'.$cost.' руб.</td></tr>';
+
+    db_query("INSERT INTO orders_data (oid, pid, description, cost) VALUES ('".$orderID."', '".$n->nid."', '".$orderDescription."', '".$cost."')");
+  }
+  $message .= '</table><p style="font-size: 20px;">Итого: '.$_SESSION['cart_cost'].'  руб.</p><p>Всю информацию о заказе и статусе его выполнения, Вы всегда можете узнать в <a href="https://метизкомплект.рф/user">личном кабинете</a></p>';
+
+  $testing_mode = variable_get('metiz_store_testing_mode');
+  if (trim($testing_mode['on']) != 'on') {
+    // mail($to, $subject, $message, $headers);
+    // mail($orderEmail, $subject, $message, $headers);
+    drupal_mail('system', 'mail', $to, language_default(), array(
+      'context' => array(
+        'subject' => $subject,
+        'message' => $message,
+      )
+    ));
+    drupal_mail('system', 'mail', $orderEmail, language_default(), array(
+      'context' => array(
+        'subject' => $subject,
+        'message' => $message,
+      )
+    ));
+  }
+
+  unset($_SESSION['cart']);
+  unset($_SESSION['cart_cost']);
+  $_SESSION['order_id'] = $orderID;
+
+  drupal_goto('shop/cart/success');
+}
+
+function metiz_store_block_info() {
+  $blocks['metiz_store_my_orders'] = array(
+    'info' => t('Мои заказы'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+    'region' => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'users/*',
+  );
+  $blocks['metiz_store_cart_block'] = array(
+    'info' => t('Корзина'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['metiz_store_news_block'] = array(
+    'info' => t('Новости'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+function metiz_store_block_view($delta = '') {
+  switch ($delta) {
+    case 'metiz_store_my_orders':
+      $block = array(
+        'subject' => t('Мои Заказы'),
+        'content' => metiz_store_user_orders(),
+      );
+      break;
+    case 'metiz_store_cart_block':
+      $block = array(
+        'subject' => t(''),
+        'content' => _metiz_store_cart_block(),
+      );
+      break;
+    case 'metiz_store_news_block':
+      $block = array(
+        'subject' => t('Новости'),
+        'content' => _metiz_store_news_block(),
+      );
+      break;
+  }
+  return $block;
+}
+
+function metiz_store_include($file) {
+  static $metiz_store_path;
+  if (!isset($metiz_store_path)) {
+    $metiz_store_path = DRUPAL_ROOT . '/' . drupal_get_path('module', 'metiz_store');
+  }
+  include_once $metiz_store_path . '/includes/' . $file . '.inc';
+}

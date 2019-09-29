@@ -1,0 +1,14 @@
+name = Metiz Store module
+description = Shoping module. Developed by Marat Farkhulin (marat.farkhulin@gmail.com).
+core = 7.x
+
+stylesheets[all][] = css/metiz_store.css
+scripts[] = js/metiz_store.js
+
+; Includes
+files[] = includes/ajax.inc
+files[] = includes/helper.inc
+files[] = includes/managment.inc
+files[] = includes/cart.inc
+files[] = includes/blocks.inc
+files[] = includes/forms.inc

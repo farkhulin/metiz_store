@@ -1,0 +1,236 @@
+/**
+ * Metiz Store CSS.
+ */
+
+.page-admin-store .order-details {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+}
+
+.page-admin-store .orders-table tr {
+  border-bottom: 1px solid grey;
+}
+
+.page-admin-store .order-detail-tabel {
+  background-color: rgba(0,0,0,0.1);
+}
+
+.page-admin-store .order-detail-tabel table {
+  background-color: rgba(0,0,0,0.05);;
+}
+
+.page-admin-store .orders-table tr i {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.5em;
+  border-radius: 1em;
+  cursor: pointer;
+}
+
+.page-admin-store .orders-table tr td .actions {
+  display: none;
+  position: absolute;
+  top: -3em;
+  background: #fff;
+  padding: 1em;
+  box-shadow: 0.3em 0.3em 0.8em 0.1em rgba(0,0,0,0.5);
+}
+
+.page-admin-store .orders-table tr td .actions span {
+  display: block;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.page-admin-store .orders-table tr td.status {
+  width: 100px;
+  position: relative;
+}
+
+.page-admin-store .orders-table tr.new i {
+  background-color: red;
+}
+
+.page-admin-store .orders-table tr.in-process i {
+  background-color: yellow;
+}
+
+.page-admin-store .orders-table tr.done i {
+  background-color: green;
+}
+
+.page-admin-store .store-statistics div {
+  width: 50%;
+  float: left;
+}
+
+.page-admin-store .store-statistics .left {
+  font-size: 1.2em;
+}
+
+.page-admin-store .store-statistics::after{
+  content: '';
+  width: 100%;
+  height: 1px;
+  float: none;
+  clear: both;
+  display: block;
+  margin-bottom: 2em;
+}
+
+.page-admin-store .form-type-select {
+  padding: 0;
+  margin: 0;
+}
+
+.page-admin-store .form-type-select label,
+.page-admin-store .form-type-select select {
+  float: left;
+  margin-right: 1em;
+}
+
+.page-admin-store .form-item-metiz-store-orders-number label,
+.page-admin-store .form-item-metiz-store-orders-number select {
+  float: none;
+}
+
+.page-admin-store table tr.odd td.active {
+  background: transparent;
+}
+
+.page-admin-store #edit-submit {
+  font-size: 0.7em;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.page-admin-store .orders-table {
+  margin-top: 2em;
+}
+
+.user-orders-table,
+.user-orders-table table {
+  width: 100%;
+}
+
+.user-orders-table table {
+  font-size: 80%;
+}
+
+.user-orders-table thead {
+  background-color: #EEEEEE;
+}
+
+.user-orders-table tr.odd {
+  background-color: white;
+}
+
+.user-orders-table tr td,
+.user-orders-table thead th {
+  padding: 0.5em;
+}
+
+.user-orders-table .order-details {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+  font-size: 90%;
+}
+
+.user-orders-table tr i {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.5em;
+  border-radius: 1em;
+  cursor: pointer;
+}
+
+.user-orders-table tr.new i {
+  background-color: red;
+}
+
+.user-orders-table tr.in-process i {
+  background-color: yellow;
+}
+
+.user-orders-table tr.done i {
+  background-color: green;
+}
+
+.page-user .item-list .pager {
+  margin-left: 0;
+  padding: 0;
+  margin-top: 2em;
+}
+
+#cart_box .cart_link {
+  display: none;
+}
+
+#metiz-store-checkout-order-form {
+  text-align: center;
+  width: 100%;
+  margin-top: 30px;
+  background: #f3f3f3;
+}
+
+#metiz-store-checkout-order-form h3 {
+  text-transform: uppercase;
+  font-size: 3em;
+  line-height: 35px;
+  padding-top: 40px;
+}
+
+#metiz-store-checkout-order-form label {
+  display: none;
+}
+
+#metiz-store-checkout-order-form input[type="text"] {
+  width: 70%;
+  margin-top: 2%;
+  height: 33px;
+  border: 1px solid #b9c0c5;
+  padding: 0 0 0 10px;
+  font-weight: bold;
+}
+
+#metiz-store-checkout-order-form input[type="submit"] {
+  height: 50px;
+  width: 170px;
+  font-weight: bold;
+  color: white;
+  border: none;
+  font-size: 11pt;
+  background-color: #0f82d0;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px auto 20px auto;
+  border-bottom: 2px solid #0e66a2;
+  border-top: 0px solid;
+  outline: none;
+}
+
+#add-cart-message {
+  position: fixed;
+  top: 40%;
+  left: 40%;
+  width: 20%;
+  text-align: center;
+  background: green;
+  font-size: 1.2em;
+  padding: 3%;
+  color: white;
+}
+
+#block-metiz-store-metiz-store-cart-block .cart_link {
+  background: white;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: normal;
+  color: #0a76bf;
+}

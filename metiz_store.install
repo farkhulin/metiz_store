@@ -1,0 +1,97 @@
+<?php
+/**
+ * Metiz Store Install.
+ */
+
+function metiz_store_schema(){
+    $schema['orders'] = array(
+        'description' => 'The table for storing the Orders data.',
+        'fields' => array(
+            'oid' => array(
+                'description' => 'The primary identifier for Order.',
+                'type' => 'int',
+                'size' => 'big',
+                'not null' => TRUE,
+                'unsigned' => TRUE,
+            ),
+            'uid' => array(
+                'description' => 'Byer uid.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'name' => array(
+                'description' => 'Byer name.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'mail' => array(
+                'description' => 'Byer email.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'phone' => array(
+                'description' => 'Byer phone.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'address' => array(
+                'description' => 'Byer address.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+            'status' => array(
+                'description' => 'Order status(2=Canceled,1=Done,0=Process).',
+                'type' => 'int',
+                'length' => 1,
+                'not null' => TRUE,
+                'default' => 1,
+            ),
+        ),
+        'primary key' => array('oid'),
+    );
+
+    $schema['orders_data'] = array(
+        'description' => 'The table for storing the Orders items.',
+        'fields' => array(
+            'oid' => array(
+                'description' => 'The primary identifier for Order.',
+                'type' => 'int',
+                'size' => 'big',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+            ),
+            'pid' => array(
+                'description' => 'Item nid.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE,
+            ),
+            'description' => array(
+                'description' => 'Order description.',
+                'type' => 'text',
+                'size' => 'normal',
+                'not null' => FALSE,
+            ),
+            'cost' => array(
+                'description' => 'Item cost.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE,
+                'default' => '',
+            ),
+        ),
+        'primary key' => array('oid', 'pid'),
+    );
+
+    return $schema;
+}
